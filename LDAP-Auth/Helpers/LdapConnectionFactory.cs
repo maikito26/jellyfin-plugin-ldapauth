@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 
 using Jellyfin.Plugin.LDAP_Auth.Config;
-using Microsoft.Extensions.Logging;
 using Novell.Directory.Ldap;
 
 namespace Jellyfin.Plugin.LDAP_Auth.Helpers;
@@ -15,6 +14,8 @@ namespace Jellyfin.Plugin.LDAP_Auth.Helpers;
 /// and <see cref="LdapConstraints.TimeLimit"/> at 0 (no API-enforced limit). Under host load that
 /// can block auth threads for tens of seconds and leave the provider unable to complete later
 /// logins until the process restarts (see jellyfin-plugin-ldapauth#187).
+/// Prefer LDAPS (<c>UseSsl</c>) over StartTLS: Novell 3.6 <c>Dispose</c>/<c>Disconnect</c> after a
+/// failed StartTLS session can block on SslStream teardown (dsbenghe/Novell.Directory.Ldap.NETStandard#101).
 /// </remarks>
 public static class LdapConnectionFactory
 {
@@ -74,31 +75,6 @@ public static class LdapConnectionFactory
         ArgumentNullException.ThrowIfNull(configuration);
 
         constraints.TimeLimit = ResolveTimeout(configuration.LdapOperationTimeoutMs, DefaultOperationTimeoutMs);
-    }
-
-    /// <summary>
-    /// Best-effort disconnect before dispose so failed StartTLS/bind attempts do not leave a half-open socket.
-    /// </summary>
-    /// <param name="ldapClient">The connection to tear down.</param>
-    /// <param name="logger">Optional logger for disconnect failures.</param>
-    public static void SafeDisconnect(LdapConnection ldapClient, ILogger logger = null)
-    {
-        if (ldapClient is null)
-        {
-            return;
-        }
-
-        try
-        {
-            if (ldapClient.Connected)
-            {
-                ldapClient.Disconnect();
-            }
-        }
-        catch (Exception ex)
-        {
-            logger?.LogDebug(ex, "Ignoring error while disconnecting a failed LDAP connection");
-        }
     }
 
     /// <summary>

@@ -37,14 +37,14 @@
                                         <input type="checkbox" is="emby-checkbox" id="chkUseSsl" />
                                         <span>Secure LDAP</span>
                                     </label>
-                                    <div class="fieldDescription checkboxFieldDescription">Use SSL for the LDAP connection.</div>
+                                    <div class="fieldDescription checkboxFieldDescription">Use LDAPS (typically port 636). Preferred over StartTLS.</div>
                                 </div>
                                 <div class="checkboxContainer checkboxContainer-withDescription">
                                     <label>
                                         <input type="checkbox" is="emby-checkbox" id="chkUseStartTls" />
                                         <span>StartTLS</span>
                                     </label>
-                                    <div class="fieldDescription checkboxFieldDescription">Use StartTLS for the LDAP connection.</div>
+                                    <div class="fieldDescription checkboxFieldDescription">Upgrade a plaintext LDAP session with StartTLS. Prefer Secure LDAP instead: after a failed bind, some LDAP servers leave Novell Dispose/Disconnect blocked for tens of seconds.</div>
                                 </div>
                                 <div class="inputContainer fldExternalAddressFilter">
                                     <input is="emby-input" type="text" id="txtLdapClientCertPath" label="LDAP Client Cert Path:" />
